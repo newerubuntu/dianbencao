@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滇南本草·五季智膳 - 智能体质诊断系统</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 步骤指示器 -->
+    <div id="progress-bar" class="progress-bar hidden">
+        <div class="progress-fill"></div>
+        <div class="progress-text">步骤 <span id="current-step">1</span> / 5</div>
+    </div>
+
+    <!-- 步骤1: 欢迎页 -->
+    <section id="step-welcome" class="step active">
+        <div class="welcome-container">
+            <div id="particles-js"></div>
+            <div class="welcome-content">
+                <h1 class="main-title">滇南本草·五季智膳</h1>
+                <p class="subtitle">AI智能体质诊断 × 个性化养生方案</p>
+                <div class="solar-term-badge">
+                    <div id="current-season" class="season-text">归属五季：春（木 · 肝）</div>
+                </div>
+                <div class="welcome-actions">
+                    <button class="btn-primary btn-large welcome-btn" onclick="startDiagnosis()">开始智能诊断</button>
+                    <button class="btn-secondary btn-large welcome-btn" onclick="openFavoritesPage()">我的药膳</button>
+                    <button class="btn-secondary btn-large welcome-btn" onclick="openHerbsPage()">滇南本草特色药材库</button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 免责声明弹窗 -->
+    <div id="disclaimer-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>问卷填写须知与免责声明</h2>
+            <div class="modal-body">
+                <p>1. 请如实填写您的性别、年龄、基础病史，昵称可自拟或系统为您匹配。</p>
+                <p>2. 本问卷+舌诊仅用于中医体质初步辨识，为您匹配个性化药膳方案，不构成任何疾病诊断、治疗建议，不能替代专业医师诊疗。</p>
+                <p>3. 药膳为日常食养调理，中医食养需辨证施膳，切勿自行将药膳替代药物治疗，如有身体不适，请务必前往正规医院就诊，遵医嘱治疗。</p>
+                <p>4. 舌诊仅为体质辨识辅助参考，不用于疾病诊断，本方案仅为日常养生参考，不承担任何医疗责任。</p>
+            </div>
+            <button class="btn-primary btn-large" onclick="acceptDisclaimer()">我已阅读并同意</button>
+        </div>
+    </div>
+
+    <!-- 步骤2: 个人信息 -->
+    <section id="step-profile" class="step">
+        <div class="container">
+            <h2 class="step-title">个人信息</h2>
+            <p class="step-desc">请如实填写，用于个性化体质辨识与记录</p>
+
+            <div class="profile-form">
+                <div class="form-group">
+                    <label for="profile-nickname">昵称</label>
+                    <input type="text" id="profile-nickname" placeholder="可自拟，留空将自动生成" maxlength="20">
+                </div>
+
+                <div class="form-group">
+                    <label>性别 <span class="required">*</span></label>
+                    <div class="radio-group">
+                        <label class="radio-label"><input type="radio" name="gender" value="男"> 男</label>
+                        <label class="radio-label"><input type="radio" name="gender" value="女"> 女</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="profile-age">年龄 <span class="required">*</span></label>
+                    <input type="number" id="profile-age" min="1" max="120" placeholder="请输入 1-120 的数字">
+                </div>
+
+                <div class="form-group">
+                    <label>基础病史 <span class="required">*</span></label>
+                    <div class="checkbox-group" id="history-checkbox-group">
+                        <label class="checkbox-label"><input type="checkbox" value="无" data-exclusive="1"> 无</label>
+                        <label class="checkbox-label"><input type="checkbox" value="高血压"> 高血压</label>
+                        <label class="checkbox-label"><input type="checkbox" value="糖尿病"> 糖尿病</label>
+                        <label class="checkbox-label"><input type="checkbox" value="心脏病"> 心脏病</label>
+                        <label class="checkbox-label"><input type="checkbox" value="肾病"> 肾病</label>
+                        <label class="checkbox-label"><input type="checkbox" value="肿瘤"> 肿瘤</label>
+                        <label class="checkbox-label"><input type="checkbox" value="过敏史"> 过敏史</label>
+                        <label class="checkbox-label"><input type="checkbox" value="消化系统疾病"> 消化系统疾病</label>
+                    </div>
+                    <input type="text" id="profile-history-other" class="history-other" placeholder="其他（可选，自由填写）">
+                </div>
+            </div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="backToWelcome()">返回首页</button>
+                <button class="btn-primary" onclick="submitProfile()">下一步</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 步骤2: 地域选择 -->
+    <section id="step-region" class="step">
+        <div class="container">
+            <h2 class="step-title">选择您所在的地域</h2>
+            <p class="step-desc">不同地域的气候特征会影响体质判断</p>
+
+            <div class="region-grid">
+                <div class="region-card" data-region="dianzhong">
+                    <h3>滇中</h3>
+                    <p>昆明、玉溪、楚雄、曲靖</p>
+                </div>
+                <div class="region-card" data-region="diandongbei">
+                    <h3>滇东北</h3>
+                    <p>昭通</p>
+                </div>
+                <div class="region-card" data-region="diandongnan">
+                    <h3>滇东南</h3>
+                    <p>红河、文山</p>
+                </div>
+                <div class="region-card" data-region="diannan">
+                    <h3>滇南</h3>
+                    <p>普洱、西双版纳</p>
+                </div>
+                <div class="region-card" data-region="dianxi">
+                    <h3>滇西</h3>
+                    <p>保山、德宏、临沧</p>
+                </div>
+                <div class="region-card" data-region="dianxibei">
+                    <h3>滇西北</h3>
+                    <p>大理、丽江、迪庆、怒江</p>
+                </div>
+            </div>
+
+            <div id="region-info" class="region-info hidden"></div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="prevStep()">上一步</button>
+                <button class="btn-primary" onclick="nextStep()" disabled id="btn-next-region">下一步</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 步骤3: 症状问卷 -->
+    <section id="step-questionnaire" class="step">
+        <div class="container">
+            <h2 class="step-title">症状问卷</h2>
+            <p class="step-desc">请根据您最近的身体状况如实回答</p>
+
+            <div class="question-container">
+                <div class="question-card" id="question-card">
+                    <div class="question-number">问题 <span id="q-num">1</span> / 18</div>
+                    <h3 class="question-text" id="q-text"></h3>
+                    <div class="options" id="q-options"></div>
+                </div>
+            </div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="prevQuestion()" id="btn-prev-q">上一题</button>
+                <button class="btn-primary" onclick="nextQuestion()" disabled id="btn-next-q">下一题</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 步骤4: 舌苔上传 -->
+    <section id="step-tongue" class="step">
+        <div class="container">
+            <h2 class="step-title">上传舌苔照片</h2>
+            <p class="step-desc">请在自然光下拍摄舌头照片，伸舌自然，不要用力</p>
+
+            <div class="upload-container">
+                <div class="upload-area" id="upload-area">
+                    <svg class="upload-icon" viewBox="0 0 24 24" width="64" height="64">
+                        <path fill="currentColor" d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/>
+                    </svg>
+                    <p>点击或拖拽上传舌苔照片</p>
+                    <input type="file" id="tongue-input" accept="image/*" hidden>
+                </div>
+
+                <div class="preview-container hidden" id="preview-container">
+                    <img id="tongue-preview" alt="舌苔预览">
+                    <button class="btn-reupload" onclick="reupload()">重新上传</button>
+                </div>
+
+                <div class="analysis-result hidden" id="tongue-analysis">
+                    <h3>舌象分析结果</h3>
+                    <div class="analysis-item">
+                        <span>舌色：</span><strong id="tongue-color"></strong>
+                    </div>
+                    <div class="analysis-item">
+                        <span>苔色：</span><strong id="coating-color"></strong>
+                    </div>
+
+                    <h4 class="analysis-subtitle">补充特征 <span class="analysis-subtitle-hint">（系统会自动识别，可手动修正或补充）</span></h4>
+
+                    <div class="analysis-feature">
+                        <label class="checkbox-label"><input type="checkbox" id="manual-cracks"> 裂纹舌</label>
+                        <span class="auto-hint">自动识别：<strong id="tongue-cracks-auto">—</strong></span>
+                    </div>
+
+                    <div class="analysis-feature">
+                        <span class="feature-label">润燥：</span>
+                        <label class="radio-label"><input type="radio" name="tongue-moisture" value="normal" checked> 正常</label>
+                        <label class="radio-label"><input type="radio" name="tongue-moisture" value="moist"> 偏润/水滑</label>
+                        <label class="radio-label"><input type="radio" name="tongue-moisture" value="dry"> 偏燥/少津</label>
+                        <span class="auto-hint">自动识别：<strong id="tongue-moisture-auto">—</strong></span>
+                    </div>
+
+                    <div class="analysis-feature">
+                        <label class="checkbox-label"><input type="checkbox" id="manual-teeth"> 齿痕舌（舌边有明显齿印）</label>
+                    </div>
+
+                    <div class="analysis-feature">
+                        <span class="feature-label">舌体：</span>
+                        <label class="radio-label"><input type="radio" name="tongue-shape" value="normal" checked> 正常</label>
+                        <label class="radio-label"><input type="radio" name="tongue-shape" value="plump"> 胖大</label>
+                        <label class="radio-label"><input type="radio" name="tongue-shape" value="thin"> 瘦薄</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="prevStep()">上一步</button>
+                <button class="btn-primary" onclick="submitDiagnosis()" disabled id="btn-submit">提交诊断</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 步骤5: 分析中 -->
+    <section id="step-analyzing" class="step">
+        <div class="analyzing-container">
+            <div class="spinner"></div>
+            <h2>正在分析您的体质...</h2>
+            <p class="analyzing-text">综合地域、节气、症状、舌象进行智能诊断</p>
+        </div>
+    </section>
+
+    <!-- 步骤6: 结果展示 -->
+    <section id="step-result" class="step">
+        <div class="container">
+            <h2 class="step-title">您的体质诊断报告</h2>
+
+            <div class="result-grid">
+                <div class="result-card">
+                    <h3>体质雷达图</h3>
+                    <canvas id="radar-chart" width="400" height="400"></canvas>
+                </div>
+
+                <div class="result-card">
+                    <h3>体质判定</h3>
+                    <div class="constitution-result">
+                        <div class="primary-constitution">
+                            <span class="label">主体质：</span>
+                            <span class="value" id="primary-const"></span>
+                        </div>
+                        <div class="secondary-constitution" id="secondary-const-container">
+                            <span class="label">兼夹体质：</span>
+                            <span class="value" id="secondary-const"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="result-card full-width">
+                    <h3>养生建议</h3>
+                    <div id="advice-content"></div>
+                </div>
+
+                <div class="result-card full-width">
+                    <h3>推荐药膳</h3>
+                    <div class="recipe-list" id="recipe-list"></div>
+                </div>
+            </div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="restart()">重新诊断</button>
+                <button class="btn-primary" onclick="downloadReport()">下载报告</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 我的药膳收藏页（与诊断向导并列） -->
+    <section id="step-favorites" class="step">
+        <div class="container">
+            <button class="btn-back" onclick="backToWelcome()">← 返回首页</button>
+            <h2 class="step-title">我的药膳</h2>
+            <p class="step-desc">浏览全部药膳并收藏您喜欢的</p>
+
+            <div class="favorites-toolbar">
+                <input type="text" id="recipe-search" placeholder="搜索药膳名/功效/药材">
+                <select id="filter-solar-term"></select>
+                <select id="filter-region"></select>
+                <label class="toolbar-check">
+                    <input type="checkbox" id="filter-only-favorited"> 仅看已收藏
+                </label>
+            </div>
+
+            <div id="all-recipes-grid" class="recipe-list"></div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="backToWelcome()">返回首页</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 滇南本草特色药材库页（与诊断向导并列） -->
+    <section id="step-herbs" class="step">
+        <div class="container">
+            <button class="btn-back" onclick="backToWelcome()">← 返回首页</button>
+            <h2 class="step-title">滇南本草特色药材库</h2>
+            <p class="step-desc">云南特色可食用药材的功效、用法与生长区域</p>
+
+            <div class="favorites-toolbar">
+                <input type="text" id="herb-search" placeholder="搜索药材名/俗名/功效/产区">
+            </div>
+
+            <div id="all-herbs-grid" class="recipe-list"></div>
+
+            <div class="step-actions">
+                <button class="btn-secondary" onclick="backToWelcome()">返回首页</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <!-- 语音控制按钮 -->
+    <div class="voice-controls">
+        <button id="voice-toggle" class="voice-btn" onclick="toggleVoice()" title="关闭语音播报">🔊</button>
+        <button id="mic-button" class="voice-btn" onclick="toggleMic()" title="点击开始语音输入">🎤</button>
+    </div>
+
+    <script src="js/voice.js"></script>
+    <script src="js/favorites.js"></script>
+    <script src="js/herbs.js"></script>
+    <script src="js/tongue.js"></script>
+    <script src="js/wizard.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
